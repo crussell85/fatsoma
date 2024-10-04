@@ -6,6 +6,9 @@ services:
       - pgdata:/var/lib/postgresql/data
     env_file: "default.env"
 
+  dynamodb:
+    image: amazon/dynamodb-local
+
   ticket-api:
     image: ticket-api
     env_file: "default.env"

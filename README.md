@@ -10,7 +10,6 @@ There is a bash script called `runme.sh` that will run the basic commands to set
 I used a transaction in postgres in an attempt to ensure that tickets and allocations are tied together so if something fails during the process it is all rolled back. 
 
 ## Problems
-
  - I'm unsure how concurrently safe this is, will postgres lock the ticket_option row whilst the rest of the SQL statements are executed and commit is ran on the transaction? Or should I have updated the allocation before creating the purchase and the tickets
  - Not enough code in the controller package to validate inputs to the API
  - Mostly just happy path validation (did test for allocation of ticket errors as this was a key requirement)
