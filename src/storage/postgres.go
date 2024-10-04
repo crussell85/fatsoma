@@ -14,7 +14,7 @@ import (
 const (
 	_insertSql                 = `INSERT INTO ticket_options(name, "desc", allocation, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id`
 	_getTicketSql              = `SELECT id, name, "desc", allocation, created_at, updated_at FROM ticket_options WHERE id = $1`
-	_updateTicketAllocationSql = `UPDATE ticket_options SET allocation = allocation - $1 WHERE id = $2`
+	_updateTicketAllocationSql = `UPDATE ticket_options SET allocation = allocation - $1, updated_at = now() AT TIME ZONE 'UTC' WHERE id = $2`
 	_insertPurchaseSql         = `INSERT INTO purchases(quantity, user_id, ticket_option_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id`
 	_insertTicketSql           = `INSERT INTO tickets(ticket_option_id, purchase_id, created_at, updated_at) VALUES ($1, $2, $3, $4) RETURNING id`
 )
