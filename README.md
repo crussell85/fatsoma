@@ -3,7 +3,7 @@
 ## Notes
 I've implemented the 3 endpoints using Gin as the http server and postgres as the database engine.
 
-I have included tests that most cover the "service" layer, im not happy with my implementation of the gin request response logic because the code is hard to test (controller package). I would refactor this in reality. An integration test suite would be useful because some logic is in the database engine (checking ticket allocation quantity) which isn't unit testable.
+I have included tests that mostly cover the "service" layer, im not happy with my implementation of the gin request response logic because the code is hard to test (controller package). I would refactor this in reality. An integration test suite would be useful because some logic is in the database engine (checking ticket allocation quantity) which isn't unit testable.
 
 There is a bash script called `runme.sh` that will run the basic commands to setup and run the environment in docker compose
 
