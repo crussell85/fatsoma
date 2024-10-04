@@ -65,7 +65,7 @@ CREATE TABLE ar_internal_metadata (
 --
 
 CREATE TABLE purchases (
-    id uuid DEFAULT uuid_generate_v4() NOT NULL,
+    id uuid UNIQUE DEFAULT uuid_generate_v4() NOT NULL,
     quantity integer,
     user_id uuid,
     ticket_option_id uuid,
@@ -88,10 +88,10 @@ CREATE TABLE schema_migrations (
 --
 
 CREATE TABLE ticket_options (
-    id uuid DEFAULT uuid_generate_v4() NOT NULL,
+    id uuid UNIQUE DEFAULT uuid_generate_v4() NOT NULL,
     name character varying,
     "desc" character varying,
-    allocation integer,
+    allocation integer CHECK (allocation >= 0),
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
 );
@@ -102,7 +102,7 @@ CREATE TABLE ticket_options (
 --
 
 CREATE TABLE tickets (
-    id uuid DEFAULT uuid_generate_v4() NOT NULL,
+    id uuid UNIQUE DEFAULT uuid_generate_v4() NOT NULL,
     ticket_option_id uuid,
     purchase_id uuid,
     created_at timestamp without time zone NOT NULL,
@@ -124,6 +124,9 @@ ALTER TABLE ONLY ar_internal_metadata
 
 ALTER TABLE ONLY purchases
     ADD CONSTRAINT purchases_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY purchases
+    ADD CONSTRAINT ticket_option_id_fkey FOREIGN KEY (ticket_option_id) REFERENCES ticket_options(id);
 
 
 --
@@ -148,6 +151,13 @@ ALTER TABLE ONLY ticket_options
 
 ALTER TABLE ONLY tickets
     ADD CONSTRAINT tickets_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY tickets
+    ADD CONSTRAINT purchase_id_fkey FOREIGN KEY (purchase_id) REFERENCES purchases (id);
+
+
+ALTER TABLE ONLY tickets
+    ADD CONSTRAINT ticket_option_id_fkey FOREIGN KEY (ticket_option_id) REFERENCES ticket_options (id);
 
 
 --

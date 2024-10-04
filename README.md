@@ -1,116 +1,16 @@
 # Ticket Allocation Coding Test
 
-## Introduction
+## Notes
+I've implemented the 3 endpoints using Gin as the http server and postgres as the database engine.
 
-Thanks for applying for a development role at Fatsoma. To give us a good
-indication of programming ability and style please submit your solution for
-this ticket allocation problem.
+I have included tests that most cover the "service" layer, im not happy with my implementation of the gin request response logic because the code is hard to test (controller package). I would refactor this in reality. An integration test suite would be useful because some logic is in the database engine (checking ticket allocation quantity) which isn't unit testable.
 
-This is not a timed test, but you do not need to spend more than a couple of
-hours on this. A partial solution is still very useful, and you can describe
-your thoughts for next steps that would be taken.
+There is a bash script called `runme.sh` that will run the basic commands to setup and run the environment in docker compose
 
-Your submission must be your own work.
+I used a transaction in postgres in an attempt to ensure that tickets and allocations are tied together so if something fails during the process it is all rolled back. 
 
-### Languages and frameworks
+## Problems
 
-For reference, here at Fatsoma we primarily develop using ruby on rails and
-golang. However feel free to solve this in whatever language you feel comfortable with and use a framework if desired.
-
-We are mainly looking for clean, well architected, tested code that highlights
-your skillset and shows technical proficiency.
-
-### Database
-
-Included is an SQL dump from PostgreSQL. It is not required to use this but
-should be helpful. You may need to amend this to add constraints.
-
-PostgreSQL has all the functionality required for satisfying this problem set,
-with some features introduced version 9.5 that may be of interest. You may
-choose to use a different database engine that satisfies the requirements of
-this problem.
-
----
-
-## Problem definition
-
-The following three routes need to be built to enable allocating of ticket
-options to multiple purchases.
-
-The solution needs to ensure that the allocation does not drop below 0,
-and the purchased amounts are not greater than the allocation given.
-
-Expect multiple requests to be made against this API concurrently.
-
-We use the term purchase but taking payment is out of scope for this problem.
-
-## Routes with Example Requests
-
-The Swagger definition and postman collection are also available in this repository for reference.
-
-### Create Ticket Option
-
-Create a ticket_option with an allocation of tickets available to purchase:
-
-`POST /ticket_options`
-
-Request Body:
-
-```json
-{
-  "name": "example",
-  "desc": "sample description",
-  "allocation": 100
-}
-```
-
-Response Body:
-
-```json
-{
-  "id": "70b751fe-04dd-4dd1-8955-ab9b188ddb1f",
-  "name": "example",
-  "desc": "sample description",
-  "allocation": 100
-}
-```
-
-### Get Ticket Option
-
-Get ticket option by id:
-
-`GET /ticket_options/:id`
-
-(No request body)
-
-Response Body:
-
-```json
-{
-  "id": "70b751fe-04dd-4dd1-8955-ab9b188ddb1f",
-  "name": "example",
-  "desc": "sample description",
-  "allocation": 100
-}
-```
-
-### Purchase from Ticket Option
-
-Purchase a quantity of tickets from the allocation of the given ticket_option:
-
-`POST /ticket_options/:id/purchases`
-
-Request body:
-
-```json
-{
-  "quantity": 2,
-  "user_id": "406c1d05-bbb2-4e94-b183-7d208c2692e1"
-}
-```
-
-(No Response body)
-
-A 2xx status code must be returned on success.
-
-A 4xx status code must be returned on any request that attempts to purchase more tickets than are available. In this case, no tickets should be purchased for that request.
+ - I'm unsure how concurrently safe this is, will postgres lock the ticket_option row whilst the rest of the SQL statements are executed and commit is ran on the transaction? Or should I have updated the allocation before creating the purchase and the tickets
+ - Not enough code in the controller package to validate inputs to the API
+ - Mostly just happy path validation (did test for allocation of ticket errors as this was a key requirement)
