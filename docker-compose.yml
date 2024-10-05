@@ -1,13 +1,10 @@
 services:
-  db:
-    image: postgres
-    volumes:
-      - ./db/database_structure.sql:/docker-entrypoint-initdb.d/init.sql
-      - pgdata:/var/lib/postgresql/data
-    env_file: "default.env"
-
   dynamodb:
     image: amazon/dynamodb-local
+    ports:
+      - 8000:8000
+    volumes:
+      - dynamodata:/home/dynamodblocal/data
 
   ticket-api:
     image: ticket-api
@@ -16,4 +13,4 @@ services:
       - 3000:3000
 
 volumes:
-  pgdata:
+  dynamodata:
