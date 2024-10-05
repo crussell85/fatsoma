@@ -56,8 +56,28 @@ func (d *DynamoTicketOptionStorage) CreateTicketOption(ctx context.Context, inpu
 }
 
 func (d *DynamoTicketOptionStorage) GetTicketOption(ctx context.Context, ticketOptionId string) (*TicketOptionResult, error) {
-	//TODO implement me
-	panic("implement me")
+	resp, err := d.cli.GetItem(ctx, &dynamodb.GetItemInput{
+		Key: map[string]types.AttributeValue{
+			"pk": &types.AttributeValueMemberS{Value: ticketOptionId},
+			"sk": &types.AttributeValueMemberS{Value: "TICKETOPTION"},
+		},
+		TableName: aws.String(d.tableName),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("unable to get ticketoption: %w", err)
+	}
+
+	allocation, err := strconv.ParseInt(resp.Item["allocation"].(*types.AttributeValueMemberN).Value, 10, 32)
+	if err != nil {
+		return nil, fmt.Errorf("something went wrong converting allocation to number: %w", err)
+	}
+
+	return &TicketOptionResult{
+		ID:          resp.Item["pk"].(*types.AttributeValueMemberS).Value,
+		Name:        resp.Item["name"].(*types.AttributeValueMemberS).Value,
+		Description: resp.Item["description"].(*types.AttributeValueMemberS).Value,
+		Allocation:  int(allocation),
+	}, nil
 }
 
 func (d *DynamoTicketOptionStorage) GenerateTickets(ctx context.Context, input *GenerateTicketsInput) (*GenerateTicketsResult, error) {
@@ -69,10 +89,10 @@ func (d *DynamoTicketOptionStorage) GenerateTickets(ctx context.Context, input *
 			"sk": &types.AttributeValueMemberS{Value: "TICKETOPTION"},
 		},
 		TableName:           aws.String(d.tableName),
-		ConditionExpression: aws.String("allocation >= :zeroValue"),
+		ConditionExpression: aws.String("allocation >= :qtyRequired"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":zeroValue": &types.AttributeValueMemberN{Value: "0"},
-			":q":         &types.AttributeValueMemberN{Value: strconv.FormatInt(int64(input.Quantity*-1), 10)},
+			":qtyRequired": &types.AttributeValueMemberN{Value: strconv.FormatInt(int64(input.Quantity), 10)},
+			":q":           &types.AttributeValueMemberN{Value: strconv.FormatInt(int64(input.Quantity*-1), 10)},
 		},
 		UpdateExpression: aws.String("ADD allocation :q"),
 	})
